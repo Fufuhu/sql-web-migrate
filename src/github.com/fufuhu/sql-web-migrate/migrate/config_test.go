@@ -242,3 +242,31 @@ func TestGetValueDefault(t *testing.T) {
 		t.Fail()
 	}
 }
+
+// TestGetMigrationSourcePath あらかじめ指定したDBのマイグレーション用の
+// SQLファイルを格納したディレクトリパスを取得するテスト。
+func TestGetMigrationSourcePath(t *testing.T) {
+	expected := "/etc/hogefuga"
+	os.Setenv(DBMigrationSourcePath, expected)
+
+	sourcePath := GetMigrationSourcePath()
+
+	if expected != sourcePath {
+		t.Fail()
+	}
+}
+
+// TestGetMigrationSourcePathDefaultValue DBマイグレーション用の
+// SQLファイルを格納したディレクトリパスについて、値の指定がない場合に、
+// デフォルトの値(DefaultDBMigrationSourcePath)が取得できること
+// を確認する
+func TestGetMigrationSourcePathDefaultValue(t *testing.T) {
+	os.Unsetenv(DBMigrationSourcePath)
+
+	sourcePath := GetMigrationSourcePath()
+
+	if sourcePath != DefaultDBMigrationSourcePath {
+		t.Fail()
+	}
+
+}

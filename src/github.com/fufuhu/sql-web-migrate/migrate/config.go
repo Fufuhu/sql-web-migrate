@@ -20,6 +20,8 @@ const (
 	DBName = "SQL_MIGRATE_DBNAME"
 	// DBSSLMode SSLモードの有効・向こうを指定するための環境変数
 	DBSSLMode = "SQL_MIGRATE_SSL_MODE"
+	// DBMigrationSourcePath DBのマイグレーションファイルの含まれているディレクトリパス
+	DBMigrationSourcePath = "SQL_MIGRATE_MIGRATION_SOURCE_PATH"
 )
 
 const (
@@ -34,7 +36,9 @@ const (
 	// DefaultDBName デフォルトのDB名
 	DefaultDBName = ""
 	// DefaultDBSSLMode デフォルトのSSLモード設定
-	DefaultDBSSLMode = "false"
+	DefaultDBSSLMode = "disable"
+	// DefaultDBMigrationSourcePath デフォルトのマイグレーションのソースパス
+	DefaultDBMigrationSourcePath = "/etc/migrate"
 )
 
 // GetHost DBホスト名を取得する。
@@ -77,7 +81,7 @@ func GetDBName() string {
 
 const (
 	//SSLModeSettingFormatErrorMessage SSLModeの設定を誤っている際のエラーメッセージです
-	SSLModeSettingFormatErrorMessage = "SSLMode should be true or false"
+	SSLModeSettingFormatErrorMessage = "SSLMode should be require, verify-full, verify-ca, or disable"
 )
 
 // GetSSLMode SSLModeの有効/無効を取得する。
@@ -86,7 +90,7 @@ const (
 func GetSSLMode() (string, error) {
 	mode := getValue(DBSSLMode, DefaultDBSSLMode)
 
-	if mode != "true" && mode != "false" {
+	if mode != "require" && mode != "verify-full" && mode != "verify-ca" && mode != "disable" {
 		return DefaultDBSSLMode, errors.New(SSLModeSettingFormatErrorMessage)
 	}
 	return mode, nil
@@ -102,4 +106,9 @@ func getValue(envKey string, defaultValue string) string {
 	}
 
 	return value
+}
+
+// GetMigrationSourcePath DBマイグレーション用のSQLファイルを格納しているディレクトリパス
+func GetMigrationSourcePath() string {
+	return getValue(DBMigrationSourcePath, DefaultDBMigrationSourcePath)
 }
