@@ -1,6 +1,7 @@
 package migrate
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -44,14 +45,16 @@ func GetHost() string {
 
 // GetPort DBのTCPポート番号を取得する。
 // 環境変数が設定されていない場合は、DefaultDBPortの値を返す
-func GetPort() int {
+// 環境変数に数字以外が設定されている場合はerrorとポート番号として-1を返す
+func GetPort() (int, error) {
 	portString := getValue(DBPort, strconv.Itoa(DefaultDBPort))
 	port, err := strconv.Atoi(portString)
 
 	if err != nil {
 		fmt.Println(err) //あとでzapに変えましょうね。
+		return -1, err
 	}
-	return port
+	return port, err
 }
 
 // GetUser DBのユーザ名を取得する
@@ -72,10 +75,21 @@ func GetDBName() string {
 	return getValue(DBName, DefaultDBName)
 }
 
+const (
+	//SSLModeSettingFormatErrorMessage SSLModeの設定を誤っている際のエラーメッセージです
+	SSLModeSettingFormatErrorMessage = "SSLMode should be true or false"
+)
+
 // GetSSLMode SSLModeの有効/無効を取得する。
 // 環境変数が設定されていない場合は、DefaultDBSSLModeの値を返す
-func GetSSLMode() string {
-	return getValue(DBSSLMode, DefaultDBSSLMode)
+// 不正な値(true/false以外)が設定されている場合はエラーとDefaultDBSSLModeの値を返す
+func GetSSLMode() (string, error) {
+	mode := getValue(DBSSLMode, DefaultDBSSLMode)
+
+	if mode != "true" && mode != "false" {
+		return DefaultDBSSLMode, errors.New(SSLModeSettingFormatErrorMessage)
+	}
+	return mode, nil
 }
 
 // getValue envKeyに指定された環境変数の値を返す。
