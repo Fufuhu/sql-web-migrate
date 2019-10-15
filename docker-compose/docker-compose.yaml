@@ -1,0 +1,18 @@
+version: "3.7"
+services:
+  db:
+    # image: postgres:9.6
+    environment:
+      POSTGRES_USER: migrate 
+      POSTGRES_PASSWORD: migrate
+      POSTGRES_DB: migrate
+      # POSTGRES_INITDB_ARGS: "unix_socket_directories='/root'"
+    ports:
+      - 5432:5432
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+      - postgres 
+      - -c 
+      - 'config_file=/etc/postgresql/postgres.conf'
