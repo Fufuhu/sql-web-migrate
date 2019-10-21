@@ -1,6 +1,8 @@
 FROM golang:1.12.10-alpine AS builder
-RUN mkdir -p /go/src
-COPY src /go/src
+RUN apk add --no-cache git gcc libc-dev
+RUN mkdir -p /go/src/github.com/fufuhu
+RUN go get -v github.com/rubenv/sql-migrate/...
+COPY src/github.com/fufuhu src/github.com/fufuhu
 RUN go build -o sql-web-migrate src/github.com/fufuhu/sql-web-migrate/main.go
 
 FROM alpine:3

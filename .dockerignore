@@ -1,0 +1,6 @@
+
+pkg/*
+bin/*
+
+src/*
+!src/github.com/fufuhu
