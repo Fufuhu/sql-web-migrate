@@ -112,3 +112,27 @@ func getValue(envKey string, defaultValue string) string {
 func GetMigrationSourcePath() string {
 	return getValue(DBMigrationSourcePath, DefaultDBMigrationSourcePath)
 }
+
+// DBConnectionConfig DBの接続情報を格納したもの
+type DBConnectionConfig struct {
+	Host     func() string
+	Port     func() (int, error)
+	User     func() string
+	Password func() string
+	DBName   func() string
+	SSLMode  func() (string, error)
+}
+
+// ConnectionConfig Databaseへの接続設定です
+var ConnectionConfig DBConnectionConfig
+
+func init() {
+	ConnectionConfig = DBConnectionConfig{
+		Host:     GetHost,
+		Port:     GetPort,
+		User:     GetUser,
+		Password: GetPassword,
+		DBName:   GetDBName,
+		SSLMode:  GetSSLMode,
+	}
+}
