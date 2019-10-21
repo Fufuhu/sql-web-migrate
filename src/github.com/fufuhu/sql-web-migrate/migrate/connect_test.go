@@ -19,3 +19,24 @@ func TestBuildConnectionString(t *testing.T) {
 		t.Fail()
 	}
 }
+
+// TestBuildConnectionStringForUnixDomainSocket
+// UnixDomainSocket用のPostgreSQL接続文字列が正常に生成できることを確認する。
+func TestBuildConnectionStringForUnixDomainSocket(t *testing.T) {
+
+	socketDirectoryPath := "/etc/postgres"
+	user := "user"
+	password := "password"
+	dbname := "dbname"
+
+	connectionString := BuildConnectionStringForUnixDomainSocket(
+		socketDirectoryPath,
+		user,
+		password,
+		dbname)
+
+	if connectionString != "host=/etc/postgres user=user password=password dbname=dbname" {
+		t.Log(connectionString)
+		t.Fail()
+	}
+}

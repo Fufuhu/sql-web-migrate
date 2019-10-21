@@ -1,5 +1,30 @@
 version: "3.7"
 services:
+  sql-web-migrate:
+    # image: sql-web-migrate
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      SQL_MIGRATE_HOST: '/var/run/postgresql'
+      SQL_MIGRATE_USER: 'migrate'
+      SQL_MIGRATE_PASSWORD: 'migrate'
+      SQL_MIGRATE_DBNAME: 'migrate'
+    command:
+      - sql-web-migrate
+    ports:
+      - 18080:18080
+    volumes:
+      - socket-volume:/var/run/postgresql
+  client:
+    image: postgres:9.6
+    command:
+      - /bin/sh
+      - -c
+      - 'tail -f /dev/null'
+    volumes:
+      - socket-volume:/var/run/postgresql
+      - socket-volume:/cloudsql/instance-connection-name
   db:
     # image: postgres:9.6
     environment:
@@ -16,3 +41,7 @@ services:
       - postgres 
       - -c 
       - 'config_file=/etc/postgresql/postgres.conf'
+    volumes:
+      - socket-volume:/tmp
+volumes:
+  socket-volume:
