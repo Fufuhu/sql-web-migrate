@@ -166,7 +166,7 @@ func TestGetDBNameDefaultValue(t *testing.T) {
 // TestGetSSLMode DBのSSLModeアクセスが有効かを確認する。
 // trueの値がかえってくることを期待する。
 func TestGetSSLMode(t *testing.T) {
-	expected := "true"
+	expected := "require"
 	os.Setenv(DBSSLMode, expected)
 
 	sslMode, err := GetSSLMode()
