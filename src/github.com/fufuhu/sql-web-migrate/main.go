@@ -137,63 +137,6 @@ func execMigrateUp(w http.ResponseWriter, r *http.Request) {
 	remote := r.RemoteAddr
 	fmt.Println(remote)
 
-	//sourcePath := config.GetMigrationSourcePath()
-	//fmt.Println(sourcePath)
-
-	//source := migrate.FileMigrationSource{
-	//	Dir: sourcePath,
-	//}
-
-	//db, err := getConnection(
-	//	config.ConnectionConfig,
-	//	"postgres")
-
-	//if err != nil {
-	//	fmt.Println("DB connection open failure.")
-	//	fmt.Println(err)
-	//}
-
-	//n, err := migrate.ExecMax(db, "postgres", source, migrate.Up, 0)
-
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-
-	//// クエリを投げる
-
-	//statement, err := db.Prepare("select id, applied_at from gorp_migrations")
-
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//defer statement.Close()
-
-	//var (
-	//	id        string
-	//	appliedAt time.Time
-	//)
-
-	//rows, err := statement.Query()
-
-	//// 結果の取得と構造体への格納
-	//records := []LogRecord{}
-	//for rows.Next() {
-	//	err := rows.Scan(&id, &appliedAt)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	fmt.Println(id, appliedAt)
-	//	record := LogRecord{
-	//		ID:        id,
-	//		AppliedAt: appliedAt.String(),
-	//	}
-
-	//	records = append(records, record)
-
-	//	// fmt.Fprintf(w, "%s %s\n", id, appliedAt)
-
-	//}
-
 	records, err := execMigrate(migrate.Up)
 	if err != nil {
 		fmt.Println(err)
@@ -215,62 +158,6 @@ func execMigrateDown(w http.ResponseWriter, r *http.Request) {
 
 	remote := r.RemoteAddr
 	fmt.Println(remote)
-
-	// sourcePath := config.GetMigrationSourcePath()
-	// fmt.Println(sourcePath)
-
-	// source := migrate.FileMigrationSource{
-	// 	Dir: sourcePath,
-	// }
-
-	// db, err := getConnection(
-	// 	config.ConnectionConfig,
-	// 	"postgres")
-
-	// if err != nil {
-	// 	fmt.Println("DB connection open failure.")
-	// 	fmt.Println(err)
-	// }
-
-	// n, err := migrate.ExecMax(db, "postgres", source, migrate.Down, 0)
-
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// // クエリを投げる
-
-	// statement, err := db.Prepare("select id, applied_at from gorp_migrations")
-
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// defer statement.Close()
-
-	// var (
-	// 	id        string
-	// 	appliedAt time.Time
-	// )
-
-	// rows, err := statement.Query()
-
-	// records := []LogRecord{}
-	// for rows.Next() {
-	// 	err := rows.Scan(&id, &appliedAt)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	fmt.Println(id, appliedAt)
-	// 	record := LogRecord{
-	// 		ID:        id,
-	// 		AppliedAt: appliedAt.String(),
-	// 	}
-
-	// 	records = append(records, record)
-
-	// 	// fmt.Fprintf(w, "%s %s\n", id, appliedAt)
-
-	// }
 
 	records, err := execMigrate(migrate.Down)
 	if err != nil {
