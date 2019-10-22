@@ -4,8 +4,14 @@ import "fmt"
 
 const (
 	// ConnectionStringTemplate 接続文字列のテンプレート
-	ConnectionStringTemplate                    = "host=%s port=%d user=%s password=%s dbname=%s sslmode=%s"
+	ConnectionStringTemplate = "host=%s port=%d user=%s password=%s dbname=%s sslmode=%s"
+	// ConnectionStringForUnixDomainSocketTemplate Template string to use Unix domain socket
 	ConnectionStringForUnixDomainSocketTemplate = "host=%s user=%s password=%s dbname=%s"
+)
+
+const (
+	// DialectPostgres PostgreSQLを使う際の指定子
+	DialectPostgres = "postgres"
 )
 
 // BuildConnectionString PostgreSQLの接続文字列を生成する

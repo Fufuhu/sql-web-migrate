@@ -10,6 +10,7 @@ import (
 	config "github.com/fufuhu/sql-web-migrate/migrate"
 	_ "github.com/lib/pq"
 	migrate "github.com/rubenv/sql-migrate"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -35,17 +36,29 @@ type LogRecord struct {
 	AppliedAt string `json:appliedAt`
 }
 
+const (
+	// ErrorKey Logger output key attribure
+	ErrorKey = "err"
+)
+
 // 一旦Postgre固定
 func getConnection(connectionConfig config.DBConnectionConfig, dialect string) (*sql.DB, error) {
+
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
 
 	host := connectionConfig.Host()
 	port, err := connectionConfig.Port()
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(
+			"Failed to get TCP port config",
+			zap.Error(err))
 	}
 	sslMode, err := connectionConfig.SSLMode()
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(
+			"Failed to get SSL mode config",
+			zap.Error(err))
 	}
 
 	var connectionString string
@@ -65,7 +78,7 @@ func getConnection(connectionConfig config.DBConnectionConfig, dialect string) (
 			sslMode)
 	}
 
-	db, err := sql.Open("postgres", connectionString)
+	db, err := sql.Open(config.DialectPostgres, connectionString)
 
 	return db, err
 }
@@ -73,7 +86,12 @@ func getConnection(connectionConfig config.DBConnectionConfig, dialect string) (
 func execMigrate(direction migrate.MigrationDirection) ([]LogRecord, error) {
 
 	sourcePath := config.GetMigrationSourcePath()
-	fmt.Println(sourcePath)
+
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+	logger.Info(
+		"Setup source file path to migrate",
+		zap.String("sourcePath", sourcePath))
 
 	source := migrate.FileMigrationSource{
 		Dir: sourcePath,
@@ -81,25 +99,32 @@ func execMigrate(direction migrate.MigrationDirection) ([]LogRecord, error) {
 
 	db, err := getConnection(
 		config.ConnectionConfig,
-		"postgres")
+		config.DialectPostgres)
 
 	if err != nil {
-		fmt.Println("DB connection open failure.")
-		fmt.Println(err)
+		logger.Error(
+			"DB connection open failure",
+			zap.Error(err))
 	}
 
-	n, err := migrate.ExecMax(db, "postgres", source, direction, 0)
+	n, err := migrate.ExecMax(db, config.DialectPostgres, source, direction, 0)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(
+			"Migration failed",
+			zap.Error(err))
 	}
-	fmt.Printf("Applied %d migrations!\n", n)
+
+	logger.Info(
+		fmt.Sprintf("Applied %d migrations!\n", n))
 
 	// クエリを投げる
 
 	statement, err := db.Prepare("select id, applied_at from gorp_migrations")
 
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(
+			"Result check failed",
+			zap.Error(err))
 	}
 	defer statement.Close()
 
@@ -131,15 +156,24 @@ func execMigrate(direction migrate.MigrationDirection) ([]LogRecord, error) {
 
 func execMigrateUp(w http.ResponseWriter, r *http.Request) {
 
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
 	addresses := r.Header.Get("X-Forwarded-For")
-	fmt.Println(addresses)
+	logger.Info(
+		"Checking HTTP Request Header, X-Forwarded-For",
+		zap.String("X-Forwarded-For", addresses))
 
 	remote := r.RemoteAddr
-	fmt.Println(remote)
+	logger.Info(
+		"Checking HTTP Request Header, RemoteAddr",
+		zap.String("RemoteAddr", remote))
 
 	records, err := execMigrate(migrate.Up)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(
+			"Migration failed",
+			zap.Error(err))
 	}
 
 	bytes, _ := json.Marshal(records)
@@ -153,15 +187,24 @@ func execMigrateUp(w http.ResponseWriter, r *http.Request) {
 
 func execMigrateDown(w http.ResponseWriter, r *http.Request) {
 
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
 	addresses := r.Header.Get("X-Forwarded-For")
-	fmt.Println(addresses)
+	logger.Info(
+		"Checking HTTP Request Header, X-Forwarded-For",
+		zap.String("X-Forwarded-For", addresses))
 
 	remote := r.RemoteAddr
-	fmt.Println(remote)
+	logger.Info(
+		"Checking HTTP Request Header, RemoteAddr",
+		zap.String("RemoteAddr", remote))
 
 	records, err := execMigrate(migrate.Down)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(
+			"Migration failed",
+			zap.Error(err))
 	}
 
 	bytes, _ := json.Marshal(records)
