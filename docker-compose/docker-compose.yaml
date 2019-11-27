@@ -1,0 +1,65 @@
+version: "3.7"
+services:
+  sql-web-migrate:
+    # image: sql-web-migrate
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      SQL_MIGRATE_HOST: '/var/run/postgresql'
+      SQL_MIGRATE_USER: 'migrate'
+      SQL_MIGRATE_PASSWORD: 'migrate'
+      SQL_MIGRATE_DBNAME: 'migrate'
+      SQL_MIGRATE_ALLOWED_NETWORKS: '172.20.0.0/24'
+    command:
+      - sql-web-migrate
+    ports:
+      - 8080:8080
+    volumes:
+      - socket-volume:/var/run/postgresql
+    networks:
+      test:
+      
+  client:
+    image: postgres:9.6
+    command:
+      - /bin/sh
+      - -c
+      - 'tail -f /dev/null'
+    volumes:
+      - socket-volume:/var/run/postgresql
+      - socket-volume:/cloudsql/instance-connection-name
+    networks:
+      test:
+
+  db:
+    # image: postgres:9.6
+    environment:
+      POSTGRES_USER: migrate 
+      POSTGRES_PASSWORD: migrate
+      POSTGRES_DB: migrate
+      # POSTGRES_INITDB_ARGS: "unix_socket_directories='/root'"
+    ports:
+      - 5432:5432
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+      - postgres 
+      - -c 
+      - 'config_file=/etc/postgresql/postgres.conf'
+    volumes:
+      - socket-volume:/tmp
+    networks:
+      test:
+
+volumes:
+  socket-volume:
+
+networks:
+  test:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/24
