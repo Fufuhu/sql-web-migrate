@@ -196,7 +196,7 @@ func execMigrateUp(w http.ResponseWriter, r *http.Request) {
 
 	networks := config.NetworkConfig.AllowedNetworks()
 
-	addresses := strings.Split(getXForwardedFor(r), " ")
+	addresses := strings.Split(getXForwardedFor(r), ",")
 	remoteAddr := strings.Split(getRemoteAddr(r), ":")[0]
 	addresses = append(addresses, remoteAddr)
 
@@ -207,6 +207,7 @@ func execMigrateUp(w http.ResponseWriter, r *http.Request) {
 
 	isAllowed := false
 	for _, ip := range ips {
+		logger.Info("Checking IP Addresss", zap.String("IPAddress", ip.String()))
 		isAllowed = networks.IsAllowed(ip)
 		if isAllowed {
 			break
