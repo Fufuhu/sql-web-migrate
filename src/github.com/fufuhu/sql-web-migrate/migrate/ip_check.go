@@ -93,7 +93,7 @@ func getXForwardedFor(r *http.Request) []net.IP {
 	)
 
 	var ips []net.IP
-	for _, address := range strings.Split(addresses, " ") {
+	for _, address := range strings.Split(addresses, ",") {
 		ips = append(ips, net.ParseIP(address))
 	}
 	return ips
